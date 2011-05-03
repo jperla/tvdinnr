@@ -1,64 +1,40 @@
 <html>
     <head>
         <title>TVDinnr: civilized conversation</title>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script> 
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"></script> 
-        <script src="http://connect.facebook.net/en_US/all.js#appId=213072778706255&amp;xfbml=1"></script>
+
+        <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script> -->
+        <script type="text/javascript" src="js/jquery.1.4.4.js"></script>
+
         <script type="text/javascript">
-            var videoid_from_url = function() {
-                var href = document.location.href;
-                if(href.indexOf('#') != -1) {
-                    var path = href.split('#', 2)[1];
-                    // assert path startswith
-                    if(path.length > 8) {
-                        var videoid = path.substr(7);
-                        return videoid;
-                    } else {
-                        return '';
-                    }
-                } else {
-                    return '';
-                }
+            var local = false;
+            var href = document.location.href;
+            if (/^file/.test(href) || /127.0.0.1/.test(href)) {
+                local = true;
             }
-
-            var url_for_video = function(videoid) {
-                var root = document.location.href.split('#', 2)[0];
-                return root + '#/video/' + videoid
-            }
-
-            var widget_width = '640';
-
-            var facebook_code = function(url) {
-                var html = '<div id="fb-root"></div><fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>';
-                return html;
-            }
-
-            var player_code = function(videoid) {
-                var html = '<iframe id="player" type="text/html" width="' + widget_width + '" height="390" src="http://www.youtube.com/embed/' + videoid + '?enablejsapi=1&origin=tvdinnr.com" frameborder="0">'
-                return html;
-            }
-
         </script>
-
-	<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
-
+	<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
     </head>
     <body>
+        <div id="header">
+            <div id="search">
+                <input type="text" class="search"></input>
+                <input type="submit" class="search-button"></input>
+            </div>
+        </div>
         <div id="content">
         </div>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                //# onload
-                var videoid = videoid_from_url();
-                if(!videoid) {
-                    /* default page */
-                    videoid = 'NnSxOfYatg8';
-                    window.location = url_for_video(videoid);
-                }
-                $('#content').append(player_code(videoid));
-                $('#content').append(facebook_code(url_for_video(videoid)));
-            });
-        </script>
 
+        <script type="text/javascript">
+            var write_doc = function(src) {
+                document.write('<script type="text/javascript" src="' + src + '"><' + '/script>');
+            }
+            
+            if (!local) {
+                write_doc('https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js');
+                write_doc('http://connect.facebook.net/en_US/all.js#appId=213072778706255&amp;xfbml=1');
+            } else {
+            }
+            write_doc('js/local.js');
+        </script>
     </body>
 </html>
