@@ -382,6 +382,28 @@ var search_system = function(search_box_target, content_target) {
         p.success(success_forward_entries(callback));
     }
 
+    var standard_feed = function(url, callback) {
+        // accepts feed url, callback func that accepts array of [YtEntry].
+        // Find the videod of that urls feed, then
+        // sends to callback.
+        var p = $.getJSON(url, {'v':2, 'alt':'json'});
+        p.success(success_forward_entries(callback));
+    }
+
+    var top_rated = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_rated');
+    var top_favorites = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites');
+    var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured');
+    var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/trending_videos');
+    var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
+    var most_popular = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_popular');
+    var most_viewed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed');
+    var most_shared = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_shared');
+    var most_discussed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed');
+    var most_responded = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_responded');
+
+
+
+
     var fill_results = function(json) {
         // accepts youtube results feed. 
         // fills content with search results.
