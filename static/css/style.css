@@ -1,4 +1,104 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Arial, sans;
+    color: #666;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 #content {
-    position: relative;
+    position: absolute;
+    left: 80px;
+    top: 80px;
+}
+
+#header {
+    position: absolute:
     padding: 0 5em;
 }
+
+#header .logo {
+    position: absolute;
+    width: 170px;
+    height: 66px;
+    left: 67px;
+    background: url(/images/newlogo.jpg) no-repeat left bottom;
+    cursor: pointer;
+}
+
+#header #search {
+    position: absolute;
+    left: 250px; /* 80 + 170 */
+}
+
+#header #search .search {
+    position: absolute;
+    font-size: 16px;
+    width: 360px;
+    top: 16px;
+}
+
+#header #search .search-button {
+    top: 18px;
+    left: 370px;
+    width: 100px;
+    position: absolute;
+}
+
+#sidebar {
+    position: absolute;
+    left: 750px;
+    width: 300px;
+    height: 800px;
+}
+
+
+/*** Search results ***/
+.result {
+    width: 600px;
+    height: 80px;
+    position: relative;
+}
+
+.result .thumb img {
+    position: absolute;
+    background-clip: border-box;
+    width: 128;
+    height: 72;
+
+    border: 1px solid lightGrey;
+}
+
+.result .details {
+    position: absolute;
+    left: 135px;
+    width: 100%;
+}
+
+.result .title {
+    position: absolute;
+    font-size: 16px;
+    top: -3px;
+}
+
+.result .description {
+    top: 20px;
+    position: absolute;
+    color:gray;
+    font-size: 12px;
+}
+
+.result .info {
+    font-size: 12px;
+    position: absolute;
+    top: 58px;
+}
+
+/*** Search results ***/
