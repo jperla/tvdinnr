@@ -1,8 +1,7 @@
-// #TODO: jperla: related videos
-// #TODO: jperla: home page
-// #TODO: jperla: author pages
 // #TODO: jperla: title and description on page
+
 // #TODO: low: design: jperla: search youtube button
+// #TODO: low: jperla: add time length to videos bottom right corner
 
 // ################### URL STUFF ######################
 var load_page = function(search_target, content_target, side_target) {
@@ -10,11 +9,14 @@ var load_page = function(search_target, content_target, side_target) {
     // basically, a router
     var href = current_url();
 
+    // #TODO: jperla: really bad
+    // #TODO: jperla: need to generalize page display
+    $('#sidebar').css('display', 'block');
+
     // ASSUMES search bar always present
     if (href == 'http://tvdinnr.com/#/') {
-        window.location = url_for_video('tHqFWYYOUAM');
-    }
-
+        home_page(content_target, side_target);
+    } else
     // video pages
     if(href.indexOf('#/v/') != -1) {
         var videoid = videoid_from_url(href);
@@ -24,8 +26,12 @@ var load_page = function(search_target, content_target, side_target) {
     if(href.indexOf('#/q/') != -1) {
         var query = query_from_url(href);
         set_title(query + ' videos');
+        $(side_target).find('.related').html(''); // #TODO: jperla: generalize
         $(search_target).find('input.search').val(query);
         $(search_target).find('.search-button').click();
+    } else
+    if(href.indexOf('#/a/') != -1) {
+        // #TODO: jperla: do proper author videos
     }
 
     // #TODO: jperla: add this fail!
@@ -109,6 +115,7 @@ var url_for_query = partial(url_for_x, 'q');
 var url_for_author = partial(url_for_x, 'a');
 // ################### URL STUFF ABOVE ######################
 
+
 var widget_width = '640';
 
 var facebook_code = function(url) {
@@ -120,7 +127,7 @@ var facebook_code = function(url) {
 var player_code = function(videoid) {
     // Accepts video id. Returns html code to show youtube widget.
     // rel=0 turns off related videos at end; autoplay=1 turns on autoplay
-    var html = '<iframe id="player" type="text/html" width="' + widget_width + '" height="390" src="http://www.youtube.com/embed/' + videoid + '?enablejsapi=1&rel=0&autoplay=1&origin=tvdinnr.com" frameborder="0">'
+    var html = '<iframe id="player" type="text/html" width="' + widget_width + '" height="390" src="http://www.youtube.com/embed/' + videoid + '?enablejsapi=1&rel=0&autoplay=0&origin=tvdinnr.com" frameborder="0">'
     return html;
 }
 
@@ -243,7 +250,11 @@ var YtEntry = function(e) {
         return e['gd$rating']['average'];
     }
     var viewCount = function() {
-        return e['yt$statistics']['viewCount'];
+        try {
+            return e['yt$statistics']['viewCount'];
+        } catch(err) {
+            return '0';
+        }
     }
     return {
         title: title,
@@ -305,64 +316,119 @@ var thousands = function(numstr) {
     }
 }
 
+var related_videos = function(videoid, callback) {
+    // accepts videoid, callback func that accepts array of [YtEntry].
+    // Find the video's related videos via jsonp youtube gdata api, 
+    // sends to callback.
+    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related';
+    var p = $.getJSON(url, {'v':2, 'alt':'json'});
+    p.success(success_forward_entries(callback));
+}
+
+var make_html = function(entries, html_func) {
+    // accepts entry results, and func (entry => html)
+    // returns concatenated html string.
+    var html = $.map(entries, function(e) { return html_func(e); });
+    return html.join('');
+}
+
+var html_yt_entry_small = function(e) {
+    // accepts YtEntry. returns html string.
+    var url = url_for_video(e.id());
+
+    var thumb = div(a_href(url, img(e.thumbnail())), 'thumb link_video');
+
+    var t = truncate(e.title(), 50);
+    var title = div(a_href(url, t), 'link_video title');
+    var author = div('by ' + e.author(), 'author');
+    var views = div(thousands(e.viewCount()) + ' views', 'views');
+
+    var details = div(title + author + views, 'details');
+    return div(thumb + details, 'result-small');
+}
+
+
+var html_yt_entry_big = function(e) {
+    // accepts YtEntry. returns html string.
+    var url = url_for_video(e.id());
+
+    var thumb = div(a_href(url, img(e.thumbnail())), 'thumb link_video');
+    var t = truncate(e.title(), 60);
+    var title = div(a_href(url, t), 'link_video title');
+
+    var description = div(truncate(e.description(), 150), 'description');
+
+    // #TODO: low: jperla: add dates
+    var a = e.author();
+
+    var author = 'by ' + a_href(url_for_query(a), a);
+    var views = strong(thousands(e.viewCount()) + ' views');
+
+    // !! #TODO: jperla: add facebook comment counts
+
+    // #TODO: very low: jperla: bar lengths indicating # views
+    var info = div(author + ' | ' + views, 'info');
+
+    var details = div(title + description + info, 'details');
+    return div(thumb + details, 'result');
+}
+
+var success_forward_one_entry = function(callback) {
+    return function(json) {
+        var entry = YtEntry(json['entry']);
+        callback(entry);
+    };
+};
+
+var success_forward_entries = function(callback) {
+    return function(json) {
+        var entries = results_from_json(json);
+        callback(entries);
+    };
+};
+
+var author_videos = function(author_username, callback) {
+    // #TODO: jperla: refactor this and 3 above.
+    var url = 'http://gdata.youtube.com/feeds/api/users/' + author_username + '/uploads?callback=?'
+    var p = $.getJSON(url, {'v':2, 'alt':'json'});
+    p.success(success_forward_entries(callback));
+}
+
+var standard_feed = function(url, callback) {
+    // accepts feed url, callback func that accepts array of [YtEntry].
+    // Find the videod of that urls feed, then
+    // sends to callback.
+    var p = $.getJSON(url + '?callback=?', {'v':2, 'alt':'json'});
+    p.success(success_forward_entries(callback));
+}
+
+var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured');
+var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web');
+var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
+
+var results_from_json = function(json) {
+    // accepts youtube results feed. returns array of youtube entries.
+    var entries = json['feed']['entry'];
+    return $.map(entries, function(e) {return YtEntry(e)});
+}
+
+var home_page = function(content_target, side_target) {
+    var fill_callback = function(target, results) {
+        var html = make_html(results, html_yt_entry_small);
+        $(target).html(html);
+    }
+    $(content_target).html(div('', 'home1') + div('', 'home2') + div('', 'home3'));
+    $('#sidebar').css('display', 'none');
+
+    recently_featured(partial(fill_callback, '.home1'));
+    trending_videos(partial(fill_callback, '.home2'));
+    most_recent(partial(fill_callback, '.home3'));
+}
+
 var search_system = function(search_box_target, content_target) {
     // accepts search area div, and content div.
     // activates search area to respond to changes, and
     // displays results in content.
-
-    var html_search_result = function(e) {
-        // accepts YtEntry. returns html string.
-        var url = url_for_video(e.id());
-
-        var thumb = div(a_href(url, img(e.thumbnail())), 'thumb link_video');
-        var t = truncate(e.title(), 60);
-        var title = div(a_href(url, t), 'link_video title');
-
-        var description = div(truncate(e.description(), 150), 'description');
-
-        // #TODO: low: jperla: add dates
-        var a = e.author();
-
-        // #TODO: low: jperla: add author urls
-        //var author = 'by ' + a_href(url_for_author(a), a);
-        var author = 'by ' + a;
-        var views = strong(thousands(e.viewCount()) + ' views');
-
-        // !! #TODO: jperla: add facebook comment counts
-
-        // #TODO: very low: jperla: bar lengths indicating # views
-        var info = div(author + ' | ' + views, 'info');
-
-        var details = div(title + description + info, 'details');
-        return div(thumb + details, 'result');
-    }
-
-    var results_from_json = function(json) {
-        // accepts youtube results feed. returns array of youtube entries.
-        var entries = json['feed']['entry'];
-        return $.map(entries, function(e) {return YtEntry(e)});
-    }
-
-    var make_html = function(entries, html_func) {
-        // accepts entry results, and func (entry => html)
-        // returns concatenated html string.
-        var html = $.map(entries, function(e) { return html_func(e); });
-        return html.join('');
-    }
-    
-    var success_forward_one_entry = function(callback) {
-        return function(json) {
-            var entry = YtEntry(json['entry']);
-            callback(entry);
-        };
-    };
-
-    var success_forward_entries = function(callback) {
-        return function(json) {
-            var entries = results_from_json(json);
-            callback(entries);
-        };
-    };
 
     var yt_info = function(videoid, callback) {
         // accepts videoid, callback func that accepts YtEntry.
@@ -373,28 +439,10 @@ var search_system = function(search_box_target, content_target) {
         p.success(success_forward_one_entry(callback));
     }
 
-    var related_videos = function(videoid, callback) {
-        // accepts videoid, callback func that accepts array of [YtEntry].
-        // Find the video's related videos via jsonp youtube gdata api, 
-        // sends to callback.
-        var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related';
-        var p = $.getJSON(url, {'v':2, 'alt':'json'});
-        p.success(success_forward_entries(callback));
-    }
 
-    var standard_feed = function(url, callback) {
-        // accepts feed url, callback func that accepts array of [YtEntry].
-        // Find the videod of that urls feed, then
-        // sends to callback.
-        var p = $.getJSON(url, {'v':2, 'alt':'json'});
-        p.success(success_forward_entries(callback));
-    }
 
     var top_rated = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_rated');
     var top_favorites = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites');
-    var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured');
-    var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/trending_videos');
-    var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
     var most_popular = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_popular');
     var most_viewed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed');
     var most_shared = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_shared');
@@ -408,8 +456,8 @@ var search_system = function(search_box_target, content_target) {
         // accepts youtube results feed. 
         // fills content with search results.
         var results = results_from_json(json);
-        var html = make_html(results, html_search_result);
-        $(content_target).html(html, 'search-results');
+        var html = make_html(results, html_yt_entry_big);
+        $(content_target).html(div(html, 'search-results'));
     }
 
     var click_search = function(e) {
@@ -463,6 +511,12 @@ var live_show_video = function(content_target, side_target, videoid) {
     t.html('');
     t.append(player_code(videoid));
     t.append(facebook_code(url_for_video(videoid)));
+
+    related_videos(videoid, function(results) {
+        var html = make_html(results, html_yt_entry_small);
+        $(side_target).find('.related').html(html);
+    });
+
     write_doc('http://connect.facebook.net/en_US/all.js#xfbml=1');
     player.init();
 }
@@ -492,14 +546,6 @@ function partial(fn) {
 $(document).ready(function() {
     $('.logo').live('click', function() { window.location = '#/' });
 
-    //# onload
-    var videoid = videoid_from_url(current_url());
-
-    if(!videoid) {
-        /* default page */
-        window.location = url_for_video('tHqFWYYOUAM');
-    }
-
     // #TODO: jperla: make local search_system
     search_system('#search', '#content').init();
     var lp = partial(load_page, '#search', '#content', '#sidebar');
@@ -507,7 +553,14 @@ $(document).ready(function() {
 
     $(window).hashchange(lp);
 
-    write_doc('http://s7.addthis.com/js/250/addthis_widget.js#pubid=jperla');
+    // enables small results to be clickable everywhere
+    $('.result-small').live('click', function() {
+        window.location = $(this).find('a').attr('href');
+    });
+
+
+    // #TODO: jperla: addthis
+    //write_doc('http://s7.addthis.com/js/250/addthis_widget.js#pubid=jperla');
 });
 
 

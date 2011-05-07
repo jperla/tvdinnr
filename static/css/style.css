@@ -17,6 +17,7 @@ a:hover {
     position: absolute;
     left: 80px;
     top: 80px;
+    width: 100%;
 }
 
 #header {
@@ -59,6 +60,21 @@ a:hover {
     height: 800px;
 }
 
+/*** Home content pages **/
+
+.home1 {
+    position: absolute;
+}
+
+.home2 {
+    position: absolute;
+    left: 320px;
+}
+
+.home3 {
+    position: absolute;
+    left: 640px;
+}
 
 /*** Search results ***/
 .result {
@@ -86,6 +102,7 @@ a:hover {
     position: absolute;
     font-size: 16px;
     top: -3px;
+    line-height: 18px;
 }
 
 .result .description {
@@ -101,4 +118,43 @@ a:hover {
     top: 58px;
 }
 
+.result-small {
+    height: 80px;
+    position: relative;
+
+    width: 300px;
+    cursor: pointer;
+}
+
+.result-small .thumb img {
+    position: absolute;
+    background-clip: border-box;
+    max-width: 108;
+
+    border: 1px solid lightGrey;
+}
+
+.result-small .details {
+    position: absolute;
+    left: 115px;
+    width: 185px; /* 240 - 115 */
+    font-size: 12px;
+}
+
+.result-small .title {
+    font-size: 13px;
+    line-height: 15px;
+}
+
+.result-small .author {
+    font-size: 12px;
+}
+
+.result-small .views {
+    font-size: 12px;
+}
+
+.result-small:hover {
+    background-color: #D2E2FB;
+}
 /*** Search results ***/
