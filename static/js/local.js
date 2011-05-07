@@ -324,17 +324,17 @@ var search_system = function(search_box_target, content_target) {
         var a = e.author();
 
         // #TODO: low: jperla: add author urls
-        //var author = 'by ' + a_href(url_for_author(a), a)
-        var author = 'by ' + a
-        var views = strong(thousands(e.viewCount()) + ' views')
+        //var author = 'by ' + a_href(url_for_author(a), a);
+        var author = 'by ' + a;
+        var views = strong(thousands(e.viewCount()) + ' views');
 
         // !! #TODO: jperla: add facebook comment counts
 
         // #TODO: very low: jperla: bar lengths indicating # views
-        var info = div(author + ' | ' + views, 'info')
+        var info = div(author + ' | ' + views, 'info');
 
         var details = div(title + description + info, 'details');
-        return div(thumb + details, 'result')
+        return div(thumb + details, 'result');
     }
 
     var results_from_json = function(json) {
@@ -348,6 +348,38 @@ var search_system = function(search_box_target, content_target) {
         // returns concatenated html string.
         var html = $.map(entries, function(e) { return html_func(e); });
         return html.join('');
+    }
+    
+    var success_forward_one_entry = function(callback) {
+        return function(json) {
+            var entry = YtEntry(json['entry']);
+            callback(entry);
+        };
+    };
+
+    var success_forward_entries = function(callback) {
+        return function(json) {
+            var entries = results_from_json(json);
+            callback(entries);
+        };
+    };
+
+    var yt_info = function(videoid, callback) {
+        // accepts videoid, callback func that accepts YtEntry.
+        // Find the video's info via jsonp youtube gdata api, 
+        // sends to callback.
+        var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid;
+        var p = $.getJSON(url, {'v':2, 'alt':'json'});
+        p.success(success_forward_one_entry(callback));
+    }
+
+    var related_videos = function(videoid, callback) {
+        // accepts videoid, callback func that accepts array of [YtEntry].
+        // Find the video's related videos via jsonp youtube gdata api, 
+        // sends to callback.
+        var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related';
+        var p = $.getJSON(url, {'v':2, 'alt':'json'});
+        p.success(success_forward_entries(callback));
     }
 
     var fill_results = function(json) {
