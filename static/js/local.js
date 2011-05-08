@@ -127,7 +127,7 @@ var facebook_code = function(url) {
 var player_code = function(videoid) {
     // Accepts video id. Returns html code to show youtube widget.
     // rel=0 turns off related videos at end; autoplay=1 turns on autoplay
-    var html = '<iframe id="player" type="text/html" width="' + widget_width + '" height="390" src="http://www.youtube.com/embed/' + videoid + '?enablejsapi=1&rel=0&autoplay=0&origin=tvdinnr.com" frameborder="0">'
+    var html = '<iframe id="player" type="text/html" width="' + widget_width + '" height="390" src="http://www.youtube.com/embed/' + videoid + '?enablejsapi=1&rel=0&autoplay=1&origin=tvdinnr.com" frameborder="0">'
     return html;
 }
 
