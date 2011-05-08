@@ -1,7 +1,6 @@
-// #TODO: jperla: title and description on page
-
 // #TODO: low: design: jperla: search youtube button
 // #TODO: low: jperla: add time length to videos bottom right corner
+// #TODO: low: jperla: other description on page
 
 // ################### URL STUFF ######################
 var load_page = function(search_target, content_target, side_target) {
@@ -27,6 +26,7 @@ var load_page = function(search_target, content_target, side_target) {
         var query = query_from_url(href);
         set_title(query + ' videos');
         $(side_target).find('.related').html(''); // #TODO: jperla: generalize
+        $(side_target).find('.info').html(''); // #TODO: jperla: generalize
         $(search_target).find('input.search').val(query);
         $(search_target).find('.search-button').click();
     } else
@@ -290,6 +290,8 @@ var html_element = function(name, text) {
 
 var li = partial(html_element, 'li')
 var strong = partial(html_element, 'strong')
+var h1 = partial(html_element, 'h1')
+var h1 = partial(html_element, 'h2')
 
 var div = function(inner, class_name) {
     var html = '<div';
@@ -406,13 +408,57 @@ var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/a
 var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web');
 var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
 
+
+var cache_on_first_arg = function(func) {
+    // accepts func that takes one arg X , and callback that accepts one arg Y.
+    // returns new func that caches result Y from arg X in a dict.
+    // speeds up the function by caching.
+    // ASSUMES func returns nothing.
+    var arg_cache = new Array();
+    var new_func = function(X, callback) {
+        var new_callback = function(Y) {
+            arg_cache[X] = Y;
+            callback(Y);
+        }
+        /* Clear arg cache if too big! */
+        if(arg_cache.length > 10000) {
+            arg_cache = new Array();
+        }
+        // end
+        if(X in arg_cache) {
+            callback(arg_cache[X]);
+        } else {
+            func(X, new_callback);
+        }
+    }
+    return new_func;
+}
+
+var yt_info = function(videoid, callback) {
+    // accepts videoid, callback func that accepts YtEntry.
+    // Find the video's info via jsonp youtube gdata api, 
+    // sends to callback.
+    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid;
+    var p = $.getJSON(url, {'v':2, 'alt':'json'});
+    p.success(success_forward_one_entry(callback));
+}
+
+
+
+
 var results_from_json = function(json) {
     // accepts youtube results feed. returns array of youtube entries.
-    var entries = json['feed']['entry'];
+    var entries = new Array();
+    var feed = json['feed'];
+    // if no results, no entry
+    if('entry' in feed) {
+        entries = feed['entry'];
+    }
     return $.map(entries, function(e) {return YtEntry(e)});
 }
 
 var home_page = function(content_target, side_target) {
+    set_title('TVDinnr: civilized conversation - it\'s YouTube with Facebook comments');
     var fill_callback = function(target, results) {
         var html = make_html(results, html_yt_entry_small);
         $(target).html(html);
@@ -429,17 +475,6 @@ var search_system = function(search_box_target, content_target) {
     // accepts search area div, and content div.
     // activates search area to respond to changes, and
     // displays results in content.
-
-    var yt_info = function(videoid, callback) {
-        // accepts videoid, callback func that accepts YtEntry.
-        // Find the video's info via jsonp youtube gdata api, 
-        // sends to callback.
-        var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid;
-        var p = $.getJSON(url, {'v':2, 'alt':'json'});
-        p.success(success_forward_one_entry(callback));
-    }
-
-
 
     var top_rated = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_rated');
     var top_favorites = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites');
@@ -506,6 +541,7 @@ var live_show_video = function(content_target, side_target, videoid) {
     // sets content to show video and facebook comments.
     
     // ASSUMES content target always exists
+    fill_info(side_target, videoid);
 
     var t = $(content_target)
     t.html('');
@@ -520,6 +556,26 @@ var live_show_video = function(content_target, side_target, videoid) {
     write_doc('http://connect.facebook.net/en_US/all.js#xfbml=1');
     player.init();
 }
+
+var fill_info = function(target, videoid) {
+    // #TODO: jperla: published #TODO: jperla:
+    // #TODO: jperla: duration
+    // #TODO: jperla: rating average
+    yt_info(videoid, function(e) {
+        var t = e.title();
+        set_title(t);
+        var title = h2(t);
+        var a = e.author();
+        var author = div(a_href(url_for_author(a), a), 'author');
+        var views = strong(thousands(e.viewCount()) + ' views');
+        // #TODO: jperla: shorten it
+        var description = '';//div(e.description())
+        var html = title + author + views + description;
+        $(target).find('.info').html(html);
+    });
+}
+
+
 
 
 // Enables the live player, or local one for local development
