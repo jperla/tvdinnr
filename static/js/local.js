@@ -1,3 +1,11 @@
+// #TODO: jperla: about, press, twitter, etc pages
+// #TODO: jperla: linter and minifier and deploy to S3
+// #TODO: jperla: add google analytics
+
+// #TODO: jperla: category browse
+
+// #TODO: jperla: when search, show 2 quick jump previews
+
 // #TODO: low: design: jperla: search youtube button
 // #TODO: low: jperla: add time length to videos bottom right corner
 // #TODO: low: jperla: other description on page
@@ -34,13 +42,17 @@ var load_page = function(search_target, content_target, side_target) {
         // #TODO: jperla: do proper author videos
     }
 
-    // #TODO: jperla: add this fail!
-    //$('#share').html('');
-    //('#share').html(addthis_update(current_url(), $('title').text()));
+    // update like buttons
+    $('#share').html('');
+    $('#share').html(addthis_update(current_url(), $('title').text()));
+    addthis.toolbox('#adtb');
+
+    // scroll to top of window
+    scrollTo(0, 0);
 }
 
 var addthis_update = function(url, title) {
-    var e = '<!-- AddThis Button BEGIN --><div class="addthis_toolbox addthis_default_style" addthis:url="' + url + '" addthis:title="' + title + '"><a class="addthis_button_facebook_like" fb:like:layout="button_count"></a><a class="addthis_button_tweet"></a><a class="addthis_counter addthis_pill_style"></a></div><script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script><!-- AddThis Button END -->';
+    var e = '<!-- AddThis Button BEGIN --><div id="adtb" class="addthis_toolbox addthis_default_style" addthis:url="' + url + '" addthis:title="' + title + '"><a class="addthis_button_facebook_like" fb:like:layout="button_count"></a><a class="addthis_button_tweet"></a><a class="addthis_counter addthis_pill_style"></a></div><script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script><!-- AddThis Button END -->';
     return e;
 }
 
@@ -67,18 +79,28 @@ var truncate = function(text, chars) {
 
 
 var videoid_from_url = function(href) {
-    // Accepts nothing. Returns the videoid if in url, #/v/<id>, else ''.
-    if(href.indexOf('#') != -1) {
-        var path = href.split('#', 2)[1];
-        // assert path startswith
-        if(path.length > 4) {
-            var videoid = path.substr(3);
-            return videoid;
-        } else {
-            return '';
-        }
+    // Accepts url. Returns the videoid if in url, #/v/<id>, else ''.
+    var path = hash_tag(href);
+    // assert path startswith
+    if(path.length > 4) {
+        var videoid = path.substr(3);
+        return videoid;
     } else {
         return '';
+    }
+}
+
+var hash_tag = function(url) {
+    // Accepts url. Returns the part after hash tag, #<hash>, else '/'.
+    if(url.indexOf('#') != -1) {
+        var h = url.split('#', 2)[1];
+        if(h.length > 0 && h[0] == '/') {
+            return h;
+        } else {
+            return '/';
+        }
+    } else {
+        return '/';
     }
 }
 
@@ -112,7 +134,7 @@ var url_for_video = partial(url_for_x, 'v');
 var url_for_query = partial(url_for_x, 'q');
 
 // Accepts author. Returns canonical url for that author.
-var url_for_author = partial(url_for_x, 'a');
+var url_for_author = partial(url_for_x, 'q');
 // ################### URL STUFF ABOVE ######################
 
 
@@ -291,7 +313,7 @@ var html_element = function(name, text) {
 var li = partial(html_element, 'li')
 var strong = partial(html_element, 'strong')
 var h1 = partial(html_element, 'h1')
-var h1 = partial(html_element, 'h2')
+var h2 = partial(html_element, 'h2')
 
 var div = function(inner, class_name) {
     var html = '<div';
@@ -363,15 +385,17 @@ var html_yt_entry_big = function(e) {
     // #TODO: low: jperla: add dates
     var a = e.author();
 
-    var author = 'by ' + a_href(url_for_query(a), a);
+    var author = 'by ' + a_href(url_for_author(a), a);
     var views = strong(thousands(e.viewCount()) + ' views');
-
-    // !! #TODO: jperla: add facebook comment counts
 
     // #TODO: very low: jperla: bar lengths indicating # views
     var info = div(author + ' | ' + views, 'info');
 
-    var details = div(title + description + info, 'details');
+    // fb comments counts
+    //#TODO: jperla: add comments
+    var comments = ''; //div('<fb:comments-count href="' + url + '"></fb:comments-count> comments', 'comments');
+
+    var details = div(title + description + info + comments, 'details');
     return div(thumb + details, 'result');
 }
 
@@ -390,7 +414,6 @@ var success_forward_entries = function(callback) {
 };
 
 var author_videos = function(author_username, callback) {
-    // #TODO: jperla: refactor this and 3 above.
     var url = 'http://gdata.youtube.com/feeds/api/users/' + author_username + '/uploads?callback=?'
     var p = $.getJSON(url, {'v':2, 'alt':'json'});
     p.success(success_forward_entries(callback));
@@ -409,30 +432,6 @@ var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api
 var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
 
 
-var cache_on_first_arg = function(func) {
-    // accepts func that takes one arg X , and callback that accepts one arg Y.
-    // returns new func that caches result Y from arg X in a dict.
-    // speeds up the function by caching.
-    // ASSUMES func returns nothing.
-    var arg_cache = new Array();
-    var new_func = function(X, callback) {
-        var new_callback = function(Y) {
-            arg_cache[X] = Y;
-            callback(Y);
-        }
-        /* Clear arg cache if too big! */
-        if(arg_cache.length > 10000) {
-            arg_cache = new Array();
-        }
-        // end
-        if(X in arg_cache) {
-            callback(arg_cache[X]);
-        } else {
-            func(X, new_callback);
-        }
-    }
-    return new_func;
-}
 
 var yt_info = function(videoid, callback) {
     // accepts videoid, callback func that accepts YtEntry.
@@ -456,6 +455,51 @@ var results_from_json = function(json) {
     }
     return $.map(entries, function(e) {return YtEntry(e)});
 }
+
+var cache_on_first_arg = function(arg_cache, func) {
+    // accepts func that takes one arg X , and callback that accepts one arg Y.
+    // returns new func that caches result Y from arg X in a dict.
+    // speeds up the function by caching.
+    // ASSUMES func returns nothing.
+    var new_func = function(X, callback) {
+        var new_callback = function(Y) {
+            arg_cache[X] = Y;
+            callback(Y);
+        }
+        /* Clear arg cache if too big! */
+        if(arg_cache.length > 10000) {
+            arg_cache = new Array();
+        }
+        // end
+        if(X in arg_cache) {
+            callback(arg_cache[X]);
+        } else {
+            func(X, new_callback);
+        }
+    }
+    return new_func;
+}
+
+var cache_ytentries = function(cache_dict, func) {
+    // accepts cache dict, function that accepts one arg and returns list of YtEntries.
+    // returns wrapped function.
+    // caches results which are YtEntries in the cache dict
+    return function(arg) {
+        var results = func(arg);
+        for(var i=0;i<results.length;i++) {
+            var r = results[i];
+            var id = r.id();
+            if(!(id in cache_dict)) {
+                cache_dict[id] = r;
+            }
+        }
+        return results;
+    }
+}
+
+var ytentry_cache = new Array();
+yt_info = cache_on_first_arg(ytentry_cache, yt_info);
+results_from_json = cache_ytentries(ytentry_cache, results_from_json);
 
 var home_page = function(content_target, side_target) {
     set_title('TVDinnr: civilized conversation - it\'s YouTube with Facebook comments');
@@ -568,7 +612,7 @@ var fill_info = function(target, videoid) {
         var a = e.author();
         var author = div(a_href(url_for_author(a), a), 'author');
         var views = strong(thousands(e.viewCount()) + ' views');
-        // #TODO: jperla: shorten it
+        // #TODO: jperla: shorten it ; show it
         var description = '';//div(e.description())
         var html = title + author + views + description;
         $(target).find('.info').html(html);
@@ -602,7 +646,20 @@ function partial(fn) {
 $(document).ready(function() {
     $('.logo').live('click', function() { window.location = '#/' });
 
+    var url = current_url();
+    if(url.indexOf('#') == -1) { 
+        // if no hash tag, go to home page
+        window.location = '#/' 
+    } else
+    if (url.indexOf('?') >= 0) {
+        // if query arguments, strip them
+        var i = url.indexOf('/', 8);
+        var root = url.substr(0, i);
+        window.location = root + '/#' + hash_tag(url);
+    }
+
     // #TODO: jperla: make local search_system
+    // #TODO: jperla: encapsulate search data api properly
     search_system('#search', '#content').init();
     var lp = partial(load_page, '#search', '#content', '#sidebar');
     lp()
@@ -614,9 +671,6 @@ $(document).ready(function() {
         window.location = $(this).find('a').attr('href');
     });
 
-
-    // #TODO: jperla: addthis
-    //write_doc('http://s7.addthis.com/js/250/addthis_widget.js#pubid=jperla');
 });
 
 

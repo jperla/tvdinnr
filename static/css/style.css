@@ -42,15 +42,23 @@ a:hover {
 #header #search .search {
     position: absolute;
     font-size: 16px;
-    width: 360px;
+    width: 350px;
     top: 16px;
 }
 
 #header #search .search-button {
     top: 18px;
-    left: 370px;
-    width: 100px;
+    font-size: 14px;
+    left: 360px;
+    width: 110px;
     position: absolute;
+}
+
+#header .tagline {
+    top: 45px;
+    font-size: 12px;
+    position: absolute;
+    width: 450px;
 }
 
 #sidebar {
@@ -58,6 +66,11 @@ a:hover {
     left: 750px;
     width: 300px;
     height: 800px;
+}
+
+#share {
+    position: relative;
+    top: 10px;
 }
 
 .info {
