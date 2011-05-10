@@ -2,6 +2,8 @@
 // #TODO: jperla: linter and minifier and deploy to S3
 // #TODO: jperla: add google analytics
 
+// wget -S http://gawker.com/5799240/the-sad-pink-donkey-who-ignited-a-taco+boycotting-revolution -U "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
+
 // #TODO: jperla: category browse
 
 // #TODO: jperla: when search, show 2 quick jump previews
@@ -142,7 +144,7 @@ var widget_width = '640';
 
 var facebook_code = function(url) {
     // Accepts local url. Returns facebook comments html code.
-    var html = '<fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>';
+    var html = div('<fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>', 'fbcomment');
     return html;
 }
 

@@ -20,6 +20,10 @@ a:hover {
     width: 100%;
 }
 
+#content .fbcomment {
+    position: absolute;
+}
+
 #header {
     position: absolute:
     padding: 0 5em;
