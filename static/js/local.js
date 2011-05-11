@@ -1,18 +1,20 @@
+/*jslint white: true, onevar: true, undef: true, nomen: true, regexp: true, plusplus: true, bitwise: true, newcap: true, strict: false, maxerr: 50, indent: 4 */
+
+// #TODO: jperla: add time length to videos bottom right corner
+
 // #TODO: jperla: about, press, twitter, etc pages
-// #TODO: jperla: linter and minifier and deploy to S3
-// #TODO: jperla: add google analytics
+// #TODO: jperla: category browse
 
 // wget -S http://gawker.com/5799240/the-sad-pink-donkey-who-ignited-a-taco+boycotting-revolution -U "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
-
-// #TODO: jperla: category browse
+// #TODO: jperla: linter
 
 // #TODO: jperla: when search, show 2 quick jump previews
 
 // #TODO: low: design: jperla: search youtube button
-// #TODO: low: jperla: add time length to videos bottom right corner
-// #TODO: low: jperla: other description on page
+// #TODO: low: design: jperla: youtube search entry results
 
 // ################### URL STUFF ######################
+
 var load_page = function(search_target, content_target, side_target) {
     // accepts nothing. reloads video if video in url.
     // basically, a router
@@ -44,13 +46,16 @@ var load_page = function(search_target, content_target, side_target) {
         // #TODO: jperla: do proper author videos
     }
 
+    // scroll to top of window
+    scrollTo(0, 0);
+
+    // track page view on google analytics
+    _gaq.push(['_trackPageview', '/#' + hash_tag(current_url())]);
+
     // update like buttons
     $('#share').html('');
     $('#share').html(addthis_update(current_url(), $('title').text()));
     addthis.toolbox('#adtb');
-
-    // scroll to top of window
-    scrollTo(0, 0);
 }
 
 var addthis_update = function(url, title) {
@@ -147,6 +152,7 @@ var facebook_code = function(url) {
     var html = div('<fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>', 'fbcomment');
     return html;
 }
+
 
 var player_code = function(videoid) {
     // Accepts video id. Returns html code to show youtube widget.
@@ -425,14 +431,19 @@ var standard_feed = function(url, callback) {
     // accepts feed url, callback func that accepts array of [YtEntry].
     // Find the videod of that urls feed, then
     // sends to callback.
-    var p = $.getJSON(url + '?callback=?', {'v':2, 'alt':'json'});
+    var new_url = url + '&callback=?';
+    var p = $.getJSON(new_url, {'alt':'json'});
     p.success(success_forward_entries(callback));
 }
 
-var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured');
-var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web');
-var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent');
+var most_popular = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?v=2&time=today');
+var most_viewed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed?v=2&time=today');
+var most_shared = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_shared?v=2');
+var most_discussed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed?v=2&time=today');
 
+var recently_featured = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured?v=2');
+var trending_videos = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/on_the_web?v=2');
+var most_recent = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_recent?v=2');
 
 
 var yt_info = function(videoid, callback) {
@@ -509,12 +520,12 @@ var home_page = function(content_target, side_target) {
         var html = make_html(results, html_yt_entry_small);
         $(target).html(html);
     }
-    $(content_target).html(div('', 'home1') + div('', 'home2') + div('', 'home3'));
+    $(content_target).html(div('<h2>Most Popular</h2>' + div(''), 'home1') + div('<h2>Most Shared</h2>' + div(''), 'home2') + div('<h2>Most Discusssed</h2>' + div(''), 'home3'));
     $('#sidebar').css('display', 'none');
 
-    recently_featured(partial(fill_callback, '.home1'));
-    trending_videos(partial(fill_callback, '.home2'));
-    most_recent(partial(fill_callback, '.home3'));
+    most_popular(partial(fill_callback, '.home1 div'));
+    most_shared(partial(fill_callback, '.home2 div'));
+    most_discussed(partial(fill_callback, '.home3 div'));
 }
 
 var search_system = function(search_box_target, content_target) {
@@ -524,10 +535,6 @@ var search_system = function(search_box_target, content_target) {
 
     var top_rated = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_rated');
     var top_favorites = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites');
-    var most_popular = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_popular');
-    var most_viewed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed');
-    var most_shared = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_shared');
-    var most_discussed = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed');
     var most_responded = partial(standard_feed, 'http://gdata.youtube.com/feeds/api/standardfeeds/most_responded');
 
 
@@ -673,6 +680,17 @@ $(document).ready(function() {
         window.location = $(this).find('a').attr('href');
     });
 
+
+    // subscribe to register comment creation after 30 seconds 
+    // (hopefully FB loaded by then)
+    setTimeout(function() {
+        FB.Event.subscribe('comment.create', function(response) {
+            _gaq.push(['_trackEvent', 'comment', 'create', hash_tag(current_url())]);
+        });
+        FB.Event.subscribe('edge.create', function(response) {
+            _gaq.push(['_trackEvent', 'fblike', hash_tag(current_url())]);
+        });
+    }, 30000);
 });
 
 
