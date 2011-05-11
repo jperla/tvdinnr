@@ -1,9 +1,8 @@
 /*jslint white: true, onevar: true, undef: true, nomen: true, regexp: true, plusplus: true, bitwise: true, newcap: true, strict: false, maxerr: 50, indent: 4 */
 
 // #TODO: jperla: add time length to videos bottom right corner
-
-// #TODO: jperla: about, press, twitter, etc pages
 // #TODO: jperla: category browse
+// #TODO: jperla: about, press, twitter, etc pages
 
 // wget -S http://gawker.com/5799240/the-sad-pink-donkey-who-ignited-a-taco+boycotting-revolution -U "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
 // #TODO: jperla: linter
@@ -11,7 +10,7 @@
 // #TODO: jperla: when search, show 2 quick jump previews
 
 // #TODO: low: design: jperla: search youtube button
-// #TODO: low: design: jperla: youtube search entry results
+// #TODO: low: design: jperla: youtube search entry results prettier
 
 // ################### URL STUFF ######################
 
@@ -228,8 +227,9 @@ var live_player = function() {
     }
 };
 
+// #TODO: jperla: double related videos funcs?
 var yt_related_videos = function(videoid) {
-    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related';
+    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related?callback=?';
     var p = $.getJSON(url, {'v':2,
                             'alt':'json',
     });
@@ -352,7 +352,7 @@ var related_videos = function(videoid, callback) {
     // accepts videoid, callback func that accepts array of [YtEntry].
     // Find the video's related videos via jsonp youtube gdata api, 
     // sends to callback.
-    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related';
+    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '/related?callback=?';
     var p = $.getJSON(url, {'v':2, 'alt':'json'});
     p.success(success_forward_entries(callback));
 }
@@ -450,7 +450,7 @@ var yt_info = function(videoid, callback) {
     // accepts videoid, callback func that accepts YtEntry.
     // Find the video's info via jsonp youtube gdata api, 
     // sends to callback.
-    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid;
+    var url = 'http://gdata.youtube.com/feeds/api/videos/' + videoid + '?callback=?';
     var p = $.getJSON(url, {'v':2, 'alt':'json'});
     p.success(success_forward_one_entry(callback));
 }
