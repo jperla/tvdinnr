@@ -1,5 +1,7 @@
 /*jslint white: true, onevar: true, undef: true, nomen: true, regexp: true, plusplus: true, bitwise: true, newcap: true, strict: false, maxerr: 50, indent: 4 */
 
+// #TODO: jperla: put video name in url
+
 // #TODO: jperla: add time length to videos bottom right corner
 // #TODO: jperla: category browse
 // #TODO: jperla: about, press, twitter, etc pages
@@ -18,10 +20,12 @@ var load_page = function(search_target, content_target, side_target) {
     // accepts nothing. reloads video if video in url.
     // basically, a router
     var href = current_url();
+    relocate_bad_url(href);
 
     // #TODO: jperla: really bad
     // #TODO: jperla: need to generalize page display
     $('#sidebar').css('display', 'block');
+
 
     // ASSUMES search bar always present
     if (href == 'http://tvdinnr.com/#/') {
@@ -652,10 +656,7 @@ function partial(fn) {
     };
 }
 
-$(document).ready(function() {
-    $('.logo').live('click', function() { window.location = '#/' });
-
-    var url = current_url();
+var relocate_bad_url = function(url) {
     if(url.indexOf('#') == -1) { 
         // if no hash tag, go to home page
         window.location = '#/' 
@@ -666,6 +667,13 @@ $(document).ready(function() {
         var root = url.substr(0, i);
         window.location = root + '/#' + hash_tag(url);
     }
+}
+
+$(document).ready(function() {
+    $('.logo').live('click', function() { window.location = '#/' });
+
+    var url = current_url();
+    relocate_bad_url(url);
 
     // #TODO: jperla: make local search_system
     // #TODO: jperla: encapsulate search data api properly
@@ -680,6 +688,7 @@ $(document).ready(function() {
         window.location = $(this).find('a').attr('href');
     });
 
+    $('#search .search').focus();
 
     // subscribe to register comment creation after 30 seconds 
     // (hopefully FB loaded by then)
