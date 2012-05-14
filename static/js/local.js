@@ -2,6 +2,8 @@
 
 // #TODO: jperla: put video name in url
 
+// #TODO: jperla: embed code url
+
 // #TODO: jperla: add time length to videos bottom right corner
 // #TODO: jperla: category browse
 // #TODO: jperla: about, press, twitter, etc pages
