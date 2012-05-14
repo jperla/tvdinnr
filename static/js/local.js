@@ -17,6 +17,7 @@
 // #TODO: low: design: jperla: youtube search entry results prettier
 
 // ################### URL STUFF ######################
+var FB; 
 
 var load_page = function(search_target, content_target, side_target) {
     // accepts nothing. reloads video if video in url.
@@ -617,6 +618,8 @@ var live_show_video = function(content_target, side_target, videoid) {
 
     //write_doc('http://connect.facebook.net/en_US/all.js#xfbml=1');
     write_doc('http://connect.facebook.net/en_US/all.js#xfbml=1&appId=213072778706255');
+    var t = setTimeout(function() { FB = null; }, 3000);
+
     player.init();
 }
 
