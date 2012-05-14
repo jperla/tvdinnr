@@ -1,9 +1,9 @@
-<html>
+<html xmlns:fb="http://www.facebook.com/2008/fbml">
     <head>
-        <title>TVDinnr: civilized conversation</title>
+        <title>TVDinnr: watch YouTube and discuss smartly</title>
+        <meta property="fb:app_id" content="213072778706255">
+        <meta property="fb:admins" content="100001931976582,1107200"/>
 
-        <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script> -->
-        <script type="text/javascript" src="js/jquery.1.4.4.js"></script>
 
         <script type="text/javascript">
             var local = false;
@@ -12,7 +12,37 @@
                 local = true;
             }
         </script>
+        <script type="text/javascript">
+            var write_doc = function(src) {
+                var ga = document.createElement('script'); 
+                ga.type = 'text/javascript'; ga.async = true;
+                ga.src = src;
+                var s = document.getElementsByTagName('script')[0]; 
+                s.parentNode.insertBefore(ga, s);
+            }
+        </script>
+
+        <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script> -->
+        <script type="text/javascript" src="js/jquery-1.6.js"></script>
+        <script type="text/javascript" src="js/jquery.ba-hashchange.min.js"></script>
+        <script type="text/javascript" src="js/local.js"></script>
+        <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=jperla"></script>
+
 	<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+    <meta type="description" value="TVDinnr: civilized conversation - it's YouTube with Facebook comments">
+
+    <script type="text/javascript"><!--
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-23254753-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    --></script>
+
     </head>
     <body>
         <!-- Facebook root -->
@@ -27,25 +57,19 @@
         <!-- END Facebook root -->
 
         <div id="header">
+            <div class="logo"></div>
             <div id="search">
                 <input type="text" class="search"></input>
-                <input type="submit" class="search-button"></input>
+                <input type="submit" class="search-button" value="Search YouTube"></input>
+                <div class="tagline">It's YouTube with Facebook comments. Watch YouTube. Discuss smartly.</div>
             </div>
         </div>
         <div id="content">
         </div>
-
-        <script type="text/javascript">
-            var write_doc = function(src) {
-                document.write('<script type="text/javascript" src="' + src + '"><' + '/script>');
-            }
-            
-            if (!local) {
-                write_doc('https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js');
-                write_doc('http://connect.facebook.net/en_US/all.js#appId=213072778706255&amp;xfbml=1');
-            } else {
-            }
-            write_doc('js/local.js');
-        </script>
+        <div id="sidebar">
+            <div id="share"></div>
+            <div class="info"></div>
+            <div class="related"></div>
+        </div>
     </body>
 </html>

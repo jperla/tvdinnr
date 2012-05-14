@@ -1,4 +1,181 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Arial, sans;
+    color: #666;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 #content {
-    position: relative;
+    position: absolute;
+    left: 80px;
+    top: 80px;
+    width: auto;
+}
+
+#content .fbcomment {
+    position: absolute;
+}
+
+#header {
+    position: absolute:
     padding: 0 5em;
 }
+
+#header .logo {
+    position: absolute;
+    width: 170px;
+    height: 66px;
+    left: 67px;
+    background: url(/images/newlogo.jpg) no-repeat left bottom;
+    cursor: pointer;
+}
+
+#header #search {
+    position: absolute;
+    left: 250px; /* 80 + 170 */
+}
+
+#header #search .search {
+    position: absolute;
+    font-size: 16px;
+    width: 350px;
+    top: 16px;
+}
+
+#header #search .search-button {
+    top: 18px;
+    font-size: 12px;
+    left: 360px;
+    width: 110px;
+    position: absolute;
+}
+
+#header .tagline {
+    top: 45px;
+    font-size: 12px;
+    position: absolute;
+    width: 450px;
+}
+
+#sidebar {
+    position: absolute;
+    left: 750px;
+    width: 300px;
+    height: 800px;
+}
+
+#share {
+    position: relative;
+    top: 10px;
+}
+
+.info {
+    margin-bottom: 20px;
+}
+
+/*** Home content pages **/
+
+.home1 {
+    position: absolute;
+}
+
+.home2 {
+    position: absolute;
+    left: 320px;
+}
+
+.home3 {
+    position: absolute;
+    left: 640px;
+}
+
+/*** Search results ***/
+.result {
+    width: 600px;
+    height: 80px;
+    position: relative;
+}
+
+.result .thumb img {
+    position: absolute;
+    background-clip: border-box;
+    width: 128;
+    height: 72;
+
+    border: 1px solid lightGrey;
+}
+
+.result .details {
+    position: absolute;
+    left: 135px;
+    width: 100%;
+}
+
+.result .title {
+    position: absolute;
+    font-size: 16px;
+    top: -3px;
+    line-height: 18px;
+}
+
+.result .description {
+    top: 20px;
+    position: absolute;
+    color:gray;
+    font-size: 12px;
+}
+
+.result .info {
+    font-size: 12px;
+    position: absolute;
+    top: 58px;
+}
+
+.result-small {
+    height: 80px;
+    position: relative;
+
+    width: 300px;
+    cursor: pointer;
+}
+
+.result-small .thumb img {
+    position: absolute;
+    background-clip: border-box;
+    max-width: 108;
+
+    border: 1px solid lightGrey;
+}
+
+.result-small .details {
+    position: absolute;
+    left: 115px;
+    width: 185px; /* 240 - 115 */
+    font-size: 12px;
+}
+
+.result-small .title {
+    font-size: 13px;
+    line-height: 15px;
+}
+
+.result-small .author {
+    font-size: 12px;
+}
+
+.result-small .views {
+    font-size: 12px;
+}
+
+.result-small:hover {
+    background-color: #D2E2FB;
+}
+/*** Search results ***/
