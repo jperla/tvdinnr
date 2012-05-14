@@ -153,8 +153,9 @@ var url_for_author = partial(url_for_x, 'q');
 var widget_width = '640';
 
 var facebook_code = function(url) {
+    //var html = '<div id="fb-root"></div><fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>';
     // Accepts local url. Returns facebook comments html code.
-    var html = div('<fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>', 'fbcomment');
+    var html = '<div class="fb-comments" data-href="' + url + '" data-num-posts="20" data-width="' + widget_width + '"></div>'
     return html;
 }
 
