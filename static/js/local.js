@@ -154,6 +154,7 @@ var facebook_code = function(url) {
     //var html = '<div id="fb-root"></div><fb:comments href="' + url + '" num_posts="10" width="' + widget_width + '"></fb:comments>';
     // Accepts local url. Returns facebook comments html code.
     var html = '<div class="fb-comments" data-href="' + url + '" data-num-posts="20" data-width="' + widget_width + '"></div>'
+    html += '<script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=213072778706255"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
     return html;
 }
 
